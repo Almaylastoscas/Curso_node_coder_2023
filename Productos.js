@@ -8,16 +8,12 @@ class ProductManager {
   }
 
   init(path) {
-    //verifico si existe el archivo
     let file = fs.existsSync(path);
-    //console.log(file)
     if (!file) {
-      //si no existe lo creo
       fs.writeFileSync(path, "[]");
       console.log("file created at path: " + this.path);
       return "file created at path: " + this.path;
     } else {
-      //si existe cargo los usuarios en la memoria del programa
       this.products = JSON.parse(fs.readFileSync(path, "UTF-8"));
       console.log("data recovered");
       return "data recovered";
@@ -25,23 +21,16 @@ class ProductManager {
   }
   async add_pruduct({ title, description, price, thumbnail, Stock }) {
     try {
-      //defino el objeto que necesito agregar al array
       let data = { title, description, price, thumbnail, Stock };
-      //si la memoria tiene usuarios
       if (this.products.length > 0) {
-        //busco el id del último elemento y le sumo 1
         let next_id = this.products[this.products.length - 1].id + 1;
-        //agrego la propiedad al objeto
+
         data.id = next_id;
       } else {
-        //en caso que no tenga: asigno el primer id
         data.id = 1;
       }
-      //agrego el objeto (usuario) a la memoria del programa
       this.products.push(data);
-      //convierto a texto plano el array
       let data_json = JSON.stringify(this.products, null, 2);
-      //sobre-escribo el archivo
       await fs.promises.writeFile(this.path, data_json);
       console.log("id´ creado del producto: " + data.id);
       return "id´s producto: " + data.id;
@@ -78,22 +67,19 @@ class ProductManager {
     }
   }
   async update_product(id, data) {
-    //data es el objeto con las propiedades que necesito modificar del usuario
     try {
-      //busco el usuario
       let one = this.getProductsById(id);
       if (!one) {
         console.log("not found editado");
         return "Not found editado";
       }
-      //itero para modificar la propiedad correspondiente
+
       for (let prop in data) {
-        //console.log(prop)
         one[prop] = data[prop];
       }
-      //convierto a texto plano el array
+
       let data_json = JSON.stringify(this.products, null, 2);
-      //sobre-escribo el archivo
+
       await fs.promises.writeFile(this.path, data_json);
       console.log("updated user: " + id);
       return "updated user: " + id;
@@ -105,17 +91,13 @@ class ProductManager {
 
   async destroy_products(id) {
     try {
-      //saco el usuario
       let one = this.getProductsById(id);
       if (!one) {
         console.log("not found eliminado");
         return "Not found eliminando";
       }
       this.products = this.products.filter((each) => each.id !== id);
-      //console.log(this.users)
-      //convierto a texto plano el array
       let data_json = JSON.stringify(this.products, null, 2);
-      //sobre-escribo el archivo
       await fs.promises.writeFile(this.path, data_json);
       console.log("delete user: " + id);
       return "delete user: " + id;
@@ -199,12 +181,12 @@ async function manager() {
     thumbnail: "./foto9.js",
     Stock: "10",
   });
-  // newProduct.getProducts();
-  // newProduct.getProductsById(9);
-  // newProduct.update_product(9, {
-  //   title: "Zapatilla NIke modificada  ",
-  //   description: "zapatilla nike Editada",
-  // });
-  newProduct.destroy_products(10);
+  await newProduct.getProducts();
+  await newProduct.getProductsById(9);
+  await newProduct.update_product(9, {
+    title: "Zapatilla NIke modificada  ",
+    description: "zapatilla nike Editada",
+  });
+  await newProduct.destroy_products(10);
 }
 manager();
